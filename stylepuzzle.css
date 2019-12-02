@@ -11,8 +11,8 @@
 }
 #puzzle
 {
-    border:1px solid #000000;
-    background: darkred;
+    border:1px solid #ff4d78;
+    background: #ff0000;
 }
 #gallery{
     table-layout: initial;

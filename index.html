@@ -2,25 +2,26 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>js Sliding puzzle</title>
-
+    <title>UKŁADANKA</title>
     <link rel="stylesheet" type="text/css" href="stylepuzzle.css" >
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 </head>
-<body>
-
-
-
-<div id="content">
-    <img id="hint" width="640px" height="640px" src="img/puzzle.jpg">
-    <canvas id="puzzle" width="640px" height="640px">
-        Your browser does not support the HTML5 canvas tag</canvas>
+<body style="background-color: #9ef8ff">
+<div style="background-color: #00ffc4" id="content">
+    <h1 style="color: #d00035">P U Z Z L E</h1>
+    <h5 style="color: #d00035">Wybierz jeden z dwunastu obrazków, który chcesz ułożyć i naciskając na klocek przylegający jednym bokiem do czerwonego, zamieniaj kawałki miejscami.</h5>
     <br />
-    <button id="resetButton" type="button">New game!</button>
+    <button style="background-color: #ffbe86" id="resetButton" type="button" >NOWA GRA</button>
     <input type="range" name="rangeInput" min="2" max="10" onchange="updateTextInput(this.value);">
     <input type="text" id="textInput" value="">
+    <br />
+    <br />
+    <img id="hint" width="640px" height="640px" src="img/puzzle.jpg">
+    <canvas id="puzzle" width="640px" height="640px">
+        Twoja przeglądarka nie obsługuje HTML5 canvas</canvas>
+
 </div>
-<center><div id="table" style="display: table;">
+<center><div style="background-color: #9ef8ff" id="table" style="display: table;">
     <div id="row1" style="display: table-row;">
         <div class="gallery" id="photo1">
             <img src="img/house.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100" >
@@ -34,25 +35,23 @@
         <div class="gallery" id="photo4" >
             <img src="img/3.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100">
         </div>
-    </div>
-    <div id="row2" style="display: table-row;">
         <div class="gallery" id="photo5">
             <img src="img/4.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100" >
         </div>
         <div class="gallery" id="photo6" >
             <img src="img/5.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100">
         </div>
+    </div>
+    <div id="row2" style="display: table-row;">
         <div class="gallery" id="photo7" >
             <img src="img/6.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100">
         </div>
         <div class="gallery" id="photo8" >
             <img src="img/7.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100">
         </div>
-    </div>
-    <div id="row3" style="display: table-row;">
         <div class="gallery" id="photo9">
-            <img src="img/8.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100" >
-        </div>
+        <img src="img/8.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100" >
+    </div>
         <div class="gallery" id="photo10" >
             <img src="img/9.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100">
         </div>
@@ -65,11 +64,6 @@
     </div>
 </div>
 </center>
-
-
-
 <script src="puzzle.js"></script>
-<script src="gallery.js"></script>
-
 </body>
 </html>
