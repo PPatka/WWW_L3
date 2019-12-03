@@ -14,7 +14,7 @@ wybranyKlocek.x = 0; //ustawienie wspołrzędnych
 wybranyKlocek.y = 0;
 var ułożony = false;
 var hint = false;
-var gridParts = new Object;
+var częściSiatki = new Object;
 ustawienieTablicy();
 
 function ustawienieTablicy() { //tworzenie tablicy dwuwymiarowej
@@ -27,21 +27,21 @@ function ustawienieTablicy() { //tworzenie tablicy dwuwymiarowej
             elementyTablicy[i][j].y = j;
         }
     }
-    setTiles();
-    setEmpty();
+    ustawienieKlocków();
+    czyszczeniePlanszy();
 
     if(!sprRozwiązywalność()) {
         if(czerwonyKlocek.y == 0  && czerwonyKlocek.x <= 1) {
-            swap(rozmiar_planszy - 2, rozmiar_planszy -1, rozmiar_planszy - 1, rozmiar_planszy - 1);
+            zamiana(rozmiar_planszy - 2, rozmiar_planszy -1, rozmiar_planszy - 1, rozmiar_planszy - 1);
         }else {
-            swap(0, 0, 1, 0);
+            zamiana(0, 0, 1, 0);
         }
-        setEmpty();
+        czyszczeniePlanszy();
     }
     ułożony = false;
 }
 
-function setTiles() { // shuffle puzzle
+function ustawienieKlocków() { // shuffle puzzle
     var i = rozmiar_planszy * rozmiar_planszy - 1;
     while(i > 0) {
         var j = Math.floor(Math.random() * i);
@@ -49,19 +49,19 @@ function setTiles() { // shuffle puzzle
         var yi = Math.floor(i / rozmiar_planszy);
         var xj = j % rozmiar_planszy;
         var yj = Math.floor(j / rozmiar_planszy);
-        swap(xi, yi, xj, yj);
+        zamiana(xi, yi, xj, yj);
         --i;
     }
 }
 
-function swap(ix, iy, jx, jy) { // zamiana pozycji puzla z z puzlmem y (to tylko nazwy)
+function zamiana(ix, iy, jx, jy) { // zamiana pozycji puzla z  puzlmem y
     var temp = new Object();
     temp= elementyTablicy[ix][iy];
     elementyTablicy[ix][iy] = elementyTablicy[jx][jy];
     elementyTablicy[jx][jy] = temp;
 }
 
-function setEmpty() { // czyścimy plansz  (na chwile )
+function czyszczeniePlanszy() { // czyścimy plansz  (na chwile )
     for(var i = 0; i < rozmiar_planszy; ++i) {
         for(var j = 0; j < rozmiar_planszy; ++j) {
             if(elementyTablicy[i][j].x == rozmiar_planszy - 1 && elementyTablicy[i][j].y == rozmiar_planszy - 1) {
@@ -72,31 +72,31 @@ function setEmpty() { // czyścimy plansz  (na chwile )
     }
 }
 
-function sumInversions() {
-    var inv	= 0;
-    for(var i =0; i < rozmiar_planszy; ++i){		//for all tiles it adds their inversions to a counter
+function sumaInwersji() {
+    var inwersje	= 0;
+    for(var i =0; i < rozmiar_planszy; ++i){
         for(var j = 0; j < rozmiar_planszy; ++j) {
-            inv += countInversions(j, i);
+            // dla każdego klocka dodaje jego inwersje do licznika
+            inwersje += policzInwersje(j, i);
         }
     }
-    return inv;
+    return inwersje;
 }
 
-function countInversions(a, b) {
-    var inv = 0;	//running counter of inversions to return when loop completes
-    var num = b * rozmiar_planszy + a;	//this essentially numbers tiles in order from 0 - tileNum - 1. like a 1d array
-    var end = rozmiar_planszy * rozmiar_planszy;	//gives end to array, stops loop before it runs out of grid
-    var value = elementyTablicy[a][b].y * rozmiar_planszy + elementyTablicy[a][b].x; 	//gives value to compare against all other values in 1d array.
-
-    for(var i = num + 1; i < end; ++i) {
+function policzInwersje(a, b) {
+    var inwersje = 0;	//licznik inwersji
+    var num = b * rozmiar_planszy + a;
+    var koniec = rozmiar_planszy * rozmiar_planszy;	// koniec tablicy, zanim pętla wyjdzie poza planszę
+    var value = elementyTablicy[a][b].y * rozmiar_planszy + elementyTablicy[a][b].x; // podaje wartość do porównania
+    for(var i = num + 1; i < koniec; ++i) {
         var x = i % rozmiar_planszy;
         var y = Math.floor(i / rozmiar_planszy);
         var comp = elementyTablicy[x][y].y *rozmiar_planszy + elementyTablicy[x][y].x;
-        if(value > comp && value != (end - 1)) {
-            ++inv;
+        if(value > comp && value != (koniec - 1)) {
+            ++inwersje;
         }
     }
-    return inv;
+    return inwersje;
 }
 
 function sprRozwiązywalność() {
@@ -104,15 +104,15 @@ function sprRozwiązywalność() {
     var row = rozmiar_planszy - emptyRow;
     //jeśli wysokość i szerokość są nieparzyste, wówczas parzysta liczba inwersji potrzebna do rozwiązania
     if(rozmiar_planszy % 2 == 1){
-        return (sumInversions() % 2 == 0);	//zwróci false, jeśli nieparzysty rozmiar i nieparzyste inwersje (nierozwiązywalne)
+        return (sumaInwersji() % 2 == 0);	//zwróci false, jeśli nieparzysty rozmiar i nieparzyste inwersje (nierozwiązywalne)
     }
     //jeśli wysokość i szerokość są równe i puste w parzystym rzędzie, wówczas odwrócenie musi być nieparzyste
     if(rozmiar_planszy % 2 == 0 && row % 2 == 0){
-        return (sumInversions() % 2 == 1);	//zwróci false, jeśli parzysty rozmiar i parzyste odwrócenie (nierozwiązywalne)
+        return (sumaInwersji() % 2 == 1);	//zwróci false, jeśli parzysty rozmiar i parzyste odwrócenie (nierozwiązywalne)
     }
     //jeśli wysokość i szerokość są parzyste i pusty w nieparzystym rzędzie, wówczas odwrócenie musi być parzyste
     if(rozmiar_planszy % 2 == 0 && row % 2 == 1){
-        return (sumInversions() % 2 == 0);	//zwróci false, jeśli nieparzyste wiersze i nieparzyste inwersje (nierozwiązywalne)
+        return (sumaInwersji() % 2 == 0);	//zwróci false, jeśli nieparzyste wiersze i nieparzyste inwersje (nierozwiązywalne)
     }
 }
 
@@ -182,6 +182,7 @@ function sprWygranej() {
 }
 
 function resetPuzzle() {
+    czyszczeniePlanszy()
     rozmiarKlocka = rozmiarCanvas / rozmiar_planszy;
     ułożony = false;
     ustawienieTablicy();
