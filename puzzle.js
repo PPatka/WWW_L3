@@ -182,7 +182,6 @@ function sprWygranej() {
 }
 
 function resetPuzzle() {
-    czyszczeniePlanszy()
     rozmiarKlocka = rozmiarCanvas / rozmiar_planszy;
     ułożony = false;
     ustawienieTablicy();
