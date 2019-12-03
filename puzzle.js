@@ -2,73 +2,71 @@ var puzzle = document.getElementById('puzzle');
 var context = puzzle.getContext('2d');
 var obrazek = new Image();
 obrazek.src = './img/puzzle.jpg';
-obrazek.addEventListener('load', drawGrid, false);
-
-var gridSize = document.getElementById('puzzle').width;
-var tileNum = 4;
-var tileSize = gridSize / tileNum;
-var clickLoc = new Object;
-clickLoc.x = 0;
-clickLoc.y = 0;
-var emptyLoc = new Object;
-emptyLoc.x = 0;
-emptyLoc.y = 0;
-
-var solved = false;
+obrazek.addEventListener('load', rysowanieSiatki, false);
+var rozmiarCanvas = document.getElementById('puzzle').width; // szerokość = 640px
+var rozmiar_planszy = 4; // plansza 4x4
+var rozmiarKlocka = rozmiarCanvas / rozmiar_planszy; //rozmiar jednego puzzla w pixelach
+var czerwonyKlocek = new Object;
+czerwonyKlocek.x = 0;
+czerwonyKlocek.y = 0;
+var wybranyKlocek = new Object;
+wybranyKlocek.x = 0; //ustawienie wspołrzędnych
+wybranyKlocek.y = 0;
+var ułożony = false;
 var hint = false;
 var gridParts = new Object;
-setBoard();
+ustawienieTablicy();
 
-function setBoard() {
-    boardParts = new Array(tileNum);
-    for (var i = 0; i < tileNum; ++i) {
-        boardParts[i] = new Array(tileNum);
-        for (var j = 0; j < tileNum; ++j) {
-            boardParts[i][j] = new Object;
-            boardParts[i][j].x = i;
-            boardParts[i][j].y = j;
+function ustawienieTablicy() { //tworzenie tablicy dwuwymiarowej
+    elementyTablicy = new Array(rozmiar_planszy);
+    for (var i = 0; i < rozmiar_planszy; ++i) {
+        elementyTablicy[i] = new Array(rozmiar_planszy);
+        for (var j = 0; j < rozmiar_planszy; ++j) {
+            elementyTablicy[i][j] = new Object;
+            elementyTablicy[i][j].x = i;
+            elementyTablicy[i][j].y = j;
         }
     }
     setTiles();
     setEmpty();
 
-    if(!isSolvable()) {
-        if(emptyLoc.y == 0  && emptyLoc.x <= 1) {
-            swap(tileNum - 2, tileNum -1, tileNum - 1, tileNum - 1);
+    if(!sprRozwiązywalność()) {
+        if(czerwonyKlocek.y == 0  && czerwonyKlocek.x <= 1) {
+            swap(rozmiar_planszy - 2, rozmiar_planszy -1, rozmiar_planszy - 1, rozmiar_planszy - 1);
         }else {
             swap(0, 0, 1, 0);
         }
         setEmpty();
     }
-    solved = false;
+    ułożony = false;
 }
 
-function setTiles() {
-    var i = tileNum * tileNum - 1;
+function setTiles() { // shuffle puzzle
+    var i = rozmiar_planszy * rozmiar_planszy - 1;
     while(i > 0) {
         var j = Math.floor(Math.random() * i);
-        var xi = i % tileNum;
-        var yi = Math.floor(i / tileNum);
-        var xj = j % tileNum;
-        var yj = Math.floor(j / tileNum);
+        var xi = i % rozmiar_planszy;
+        var yi = Math.floor(i / rozmiar_planszy);
+        var xj = j % rozmiar_planszy;
+        var yj = Math.floor(j / rozmiar_planszy);
         swap(xi, yi, xj, yj);
         --i;
     }
 }
 
-function swap(ix, iy, jx, jy) {
+function swap(ix, iy, jx, jy) { // zamiana pozycji puzla z z puzlmem y (to tylko nazwy)
     var temp = new Object();
-    temp= boardParts[ix][iy];
-    boardParts[ix][iy] = boardParts[jx][jy];
-    boardParts[jx][jy] = temp;
+    temp= elementyTablicy[ix][iy];
+    elementyTablicy[ix][iy] = elementyTablicy[jx][jy];
+    elementyTablicy[jx][jy] = temp;
 }
 
-function setEmpty() {
-    for(var i = 0; i < tileNum; ++i) {
-        for(var j = 0; j < tileNum; ++j) {
-            if(boardParts[i][j].x == tileNum - 1 && boardParts[i][j].y == tileNum - 1) {
-                emptyLoc.x = 0;
-                emptyLoc.y = 0;
+function setEmpty() { // czyścimy plansz  (na chwile )
+    for(var i = 0; i < rozmiar_planszy; ++i) {
+        for(var j = 0; j < rozmiar_planszy; ++j) {
+            if(elementyTablicy[i][j].x == rozmiar_planszy - 1 && elementyTablicy[i][j].y == rozmiar_planszy - 1) {
+                czerwonyKlocek.x = 0;
+                czerwonyKlocek.y = 0;
             }
         }
     }
@@ -76,8 +74,8 @@ function setEmpty() {
 
 function sumInversions() {
     var inv	= 0;
-    for(var i =0; i < tileNum; ++i){		//for all tiles it adds their inversions to a counter
-        for(var j = 0; j < tileNum; ++j) {
+    for(var i =0; i < rozmiar_planszy; ++i){		//for all tiles it adds their inversions to a counter
+        for(var j = 0; j < rozmiar_planszy; ++j) {
             inv += countInversions(j, i);
         }
     }
@@ -86,14 +84,14 @@ function sumInversions() {
 
 function countInversions(a, b) {
     var inv = 0;	//running counter of inversions to return when loop completes
-    var num = b * tileNum + a;	//this essentially numbers tiles in order from 0 - tileNum - 1. like a 1d array
-    var end = tileNum * tileNum;	//gives end to array, stops loop before it runs out of grid
-    var value = boardParts[a][b].y * tileNum + boardParts[a][b].x; 	//gives value to compare against all other values in 1d array.
+    var num = b * rozmiar_planszy + a;	//this essentially numbers tiles in order from 0 - tileNum - 1. like a 1d array
+    var end = rozmiar_planszy * rozmiar_planszy;	//gives end to array, stops loop before it runs out of grid
+    var value = elementyTablicy[a][b].y * rozmiar_planszy + elementyTablicy[a][b].x; 	//gives value to compare against all other values in 1d array.
 
     for(var i = num + 1; i < end; ++i) {
-        var x = i % tileNum;
-        var y = Math.floor(i / tileNum);
-        var comp = boardParts[x][y].y *tileNum + boardParts[x][y].x;
+        var x = i % rozmiar_planszy;
+        var y = Math.floor(i / rozmiar_planszy);
+        var comp = elementyTablicy[x][y].y *rozmiar_planszy + elementyTablicy[x][y].x;
         if(value > comp && value != (end - 1)) {
             ++inv;
         }
@@ -101,90 +99,93 @@ function countInversions(a, b) {
     return inv;
 }
 
-function isSolvable() {
-    var emptyRow = emptyLoc.y;
-    var row = tileNum - emptyRow;
-
-    if(tileNum % 2 == 1){	//if the height and width is odd then even number of inversions needed to be solvable
-        return (sumInversions() % 2 == 0);	//will return false if odd size and odd inversions (unsolvable)
+function sprRozwiązywalność() {
+    var emptyRow = czerwonyKlocek.y;
+    var row = rozmiar_planszy - emptyRow;
+    //jeśli wysokość i szerokość są nieparzyste, wówczas parzysta liczba inwersji potrzebna do rozwiązania
+    if(rozmiar_planszy % 2 == 1){
+        return (sumInversions() % 2 == 0);	//zwróci false, jeśli nieparzysty rozmiar i nieparzyste inwersje (nierozwiązywalne)
     }
-    if(tileNum % 2 == 0 && row % 2 == 0){		//if height and width is even and empty on even row then inversions must be odd
-        return (sumInversions() % 2 == 1);	//will return false if even size and even inversions (unsolvable)
+    //jeśli wysokość i szerokość są równe i puste w parzystym rzędzie, wówczas odwrócenie musi być nieparzyste
+    if(rozmiar_planszy % 2 == 0 && row % 2 == 0){
+        return (sumInversions() % 2 == 1);	//zwróci false, jeśli parzysty rozmiar i parzyste odwrócenie (nierozwiązywalne)
     }
-    if(tileNum % 2 == 0 && row % 2 == 1){	//if height and width is even and empty on odd row then inversions must be even
-        return (sumInversions() % 2 == 0);	//will return false if odd row and odd inversions (unsolvable)
+    //jeśli wysokość i szerokość są parzyste i pusty w nieparzystym rzędzie, wówczas odwrócenie musi być parzyste
+    if(rozmiar_planszy % 2 == 0 && row % 2 == 1){
+        return (sumInversions() % 2 == 0);	//zwróci false, jeśli nieparzyste wiersze i nieparzyste inwersje (nierozwiązywalne)
     }
 }
 
-function drawGrid() {
-    context.clearRect(0, 0, gridSize, gridSize);
-    for(var i = 0; i < tileNum; ++i) {
-        for(var j = 0; j < tileNum; ++j) {
-            var x = boardParts[i][j].x;
-            var y = boardParts[i][j].y;
-            if(i != emptyLoc.x || j != emptyLoc.y || solved == true) {
-                context.drawImage(obrazek, x * tileSize, y * tileSize, tileSize, tileSize, i * tileSize, j * tileSize, tileSize, tileSize);
+function rysowanieSiatki() {
+    context.clearRect(0, 0, rozmiarCanvas, rozmiarCanvas);
+    for(var i = 0; i < rozmiar_planszy; ++i) {
+        for(var j = 0; j < rozmiar_planszy; ++j) {
+            var x = elementyTablicy[i][j].x;
+            var y = elementyTablicy[i][j].y;
+            if(i != czerwonyKlocek.x || j != czerwonyKlocek.y || ułożony == true) {
+                context.drawImage(obrazek, x * rozmiarKlocka, y * rozmiarKlocka, rozmiarKlocka, rozmiarKlocka, i * rozmiarKlocka, j * rozmiarKlocka, rozmiarKlocka, rozmiarKlocka);
             }
         }
     }
 }
 
-function distance(cX, cY, eX, eY) {
+function odległość(cX, cY, eX, eY) {
     var d = Math.abs(cX - eX) + Math.abs(cY - eY);
     return d;
 }
-
+//onmouseover - gdy wskaźnk myszki zostanie przesunięty na canvas
 document.getElementById('puzzle').onmouseover = function(e){
-    clickLoc.x = Math.floor((e.pageX - this.offsetLeft) / tileSize);
-    clickLoc.y = Math.floor((e.pageY - this.offsetTop) / tileSize);
+    //pageX, pageY - odczytują wspolrzedne x i y (w pixelach) miejsca kliknięcia myszką
+    // offsetX, offsetY zwracaja wspolrzędne wskaznika myszki, względnie do elementu docelowego - czyli tutaj wybranego klocka
+    wybranyKlocek.x = Math.floor((e.pageX - this.offsetLeft) / rozmiarKlocka);
+    wybranyKlocek.y = Math.floor((e.pageY - this.offsetTop) / rozmiarKlocka);
 };
 
 
 document.getElementById('puzzle').onclick = function(e) {
-    if(!solved) {
-        clickLoc.x = Math.floor((e.pageX - this.offsetLeft) / tileSize); // pozycja x kwadracika na którego kliknęlismy
-        clickLoc.y = Math.floor((e.pageY - this.offsetTop) / tileSize);  // pozycja y kwadracika na którego kliknęlismy
-        var d = distance(clickLoc.x, clickLoc.y, emptyLoc.x, emptyLoc.y);
-        if(d == 1) {
-            slideTiles(emptyLoc, clickLoc);
-            drawGrid();
+    if(!ułożony) {
+        wybranyKlocek.x = Math.floor((e.pageX - this.offsetLeft) / rozmiarKlocka); // pozycja x klocka na którego kliknęlismy
+        wybranyKlocek.y = Math.floor((e.pageY - this.offsetTop) / rozmiarKlocka);  // pozycja y klocka na którego kliknęlismy
+        var odl = odległość(wybranyKlocek.x, wybranyKlocek.y, czerwonyKlocek.x, czerwonyKlocek.y);
+        if(odl == 1) { //jeśli odległoć od czerwonego klocka jest = 1, czyli wybrany klocek przylega do niego
+            zamianaKlocków(czerwonyKlocek, wybranyKlocek);
+            rysowanieSiatki();
         }
 
-        if(solved) {
+        if(ułożony) {
             solvedAlert();
         }
     }
 };
 
-function slideTiles(emptyLoc, clickLoc) {
-    boardParts[emptyLoc.x][emptyLoc.y].x = boardParts[clickLoc.x][clickLoc.y].x;
-    boardParts[emptyLoc.x][emptyLoc.y].y = boardParts[clickLoc.x][clickLoc.y].y;
-    boardParts[clickLoc.x][clickLoc.y].x = tileNum - 1;
-    boardParts[clickLoc.x][clickLoc.y].y = tileNum - 1;
-    emptyLoc.x = clickLoc.x;
-    emptyLoc.y = clickLoc.y;
-    checkSolved();
+function zamianaKlocków(czerwony, wybrany) {
+    elementyTablicy[czerwony.x][czerwony.y].x = elementyTablicy[wybrany.x][wybrany.y].x;
+    elementyTablicy[czerwony.x][czerwony.y].y = elementyTablicy[wybrany.x][wybrany.y].y;
+    elementyTablicy[wybrany.x][wybrany.y].x = rozmiar_planszy - 1;
+    elementyTablicy[wybrany.x][wybrany.y].y = rozmiar_planszy - 1;
+    czerwony.x = wybrany.x;
+    czerwony.y = wybrany.y;
+    sprWygranej();
 }
 
-function checkSolved() {
-    for(var i = 0; i < tileNum; ++i) {
-        for(var j = 0; j < tileNum; ++j) {
-            console.log(boardParts[i][j].x + " " + boardParts[i][j].y)
-            if(boardParts[i][j].x != i || boardParts[i][j].y != j) {
-                solved = false;
+function sprWygranej() {
+    for(var i = 0; i < rozmiar_planszy; ++i) {
+        for(var j = 0; j < rozmiar_planszy; ++j) {
+            //jeśli którakolwiek ze współrzędnych nie będzie sie zgadzać to obrazek nie został ułożony
+            if(elementyTablicy[i][j].x != i || elementyTablicy[i][j].y != j) {
+                ułożony = false;
                 return;
             }
         }
     }
-    solved = true;
-
+    ułożony = true;
 }
 
 function resetPuzzle() {
-    tileSize = gridSize / tileNum;
-    solved = false;
-    setBoard();
-    drawGrid();
+    rozmiarKlocka = rozmiarCanvas / rozmiar_planszy;
+    ułożony = false;
+    ustawienieTablicy();
+    rysowanieSiatki();
 }
 
 $(function () {
@@ -197,12 +198,12 @@ document.getElementById('resetButton').onclick = function(e) {
 
 function test(src) {
     obrazek.src = src;
-    document.getElementById("hint").src = src;
+    document.getElementById("hint").src = src; //obrazek źródłowy, wskazówka
 }
 
 function updateTextInput(val) {
     document.getElementById('textInput').value=val;
-    tileNum = val;
+    rozmiar_planszy = val;
 }
 function solvedAlert() {
     var retry = confirm('Wygrałeś! Chcesz zagrać ponownie?');
@@ -220,7 +221,7 @@ document.getElementById('puzzle').onmouseover = function(e) {
 };
 
 document.getElementById('hint').onmouseout = function(e) {
-    drawGrid();
+    rysowanieSiatki();
 };
 
 function getImage(url){
@@ -258,13 +259,13 @@ function mousePos(e) {
        // console.log(mouseX + mouseY)
     }
 
-    clickLoc.x = Math.floor((mouseX) / tileSize);
-    clickLoc.y = Math.floor((mouseY) / tileSize);
-    var d = distance(clickLoc.x, clickLoc.y, emptyLoc.x, emptyLoc.y);
+    wybranyKlocek.x = Math.floor((mouseX) / rozmiarKlocka);
+    wybranyKlocek.y = Math.floor((mouseY) / rozmiarKlocka);
+    var d = odległość(wybranyKlocek.x, wybranyKlocek.y, czerwonyKlocek.x, czerwonyKlocek.y);
     if(d == 1){
-        document.body.style.cursor = 'grab';
+        document.body.style.cursor = 'grab'; // kursor łapka
     }
     else {
-        document.body.style.cursor = 'default';
+        document.body.style.cursor = 'default'; //kursor domyślna strzałka czyli ze nie mozna kliknac
     }
 }

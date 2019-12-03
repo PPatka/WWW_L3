@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>UKŁADANKA</title>
-    <link rel="stylesheet" type="text/css" href="stylepuzzle.css" >
+    <link rel="stylesheet" type="text/css" href="style.css" >
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 </head>
 <body style="background-color: #9ef8ff">
 <div style="background-color: #00ffc4" id="content">
     <h1 style="color: #d00035">P U Z Z L E</h1>
     <h5 style="color: #d00035">Wybierz jeden z dwunastu obrazków, który chcesz ułożyć i naciskając na klocek przylegający jednym bokiem do czerwonego, zamieniaj kawałki miejscami.</h5>
-    <br />
-    <button style="background-color: #ffbe86" id="resetButton" type="button" >NOWA GRA</button>
-    <input type="range" name="rangeInput" min="2" max="10" onchange="updateTextInput(this.value);">
-    <input type="text" id="textInput" value="">
+    <h5> Podaj parametr (liczba kolumn = liczba wierszy) :
+        <input type="text" id="textInput" value="" onchange="updateTextInput(this.value);"></h5>
+    <button style="background-color: #ff4500" id="resetButton" type="button " >NOWA GRA</button>
     <br />
     <br />
     <img id="hint" width="640px" height="640px" src="img/puzzle.jpg">
@@ -21,7 +20,7 @@
         Twoja przeglądarka nie obsługuje HTML5 canvas</canvas>
 
 </div>
-<center><div style="background-color: #9ef8ff" id="table" style="display: table;">
+<center><div style="background-color: #00a87d" id="table" style="display: table;">
     <div id="row1" style="display: table-row;">
         <div class="gallery" id="photo1">
             <img src="img/house.jpg" onclick="loadFull(this.src)" alt="Cinque Terre" width="100" height="100" >

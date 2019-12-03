@@ -26,6 +26,7 @@
 }
 
 @media screen and (max-width: 1350px){
+    /*ukrywa obrazek wskazówkowy*/
     #hint{
         display: none;
     }
