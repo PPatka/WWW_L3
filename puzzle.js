@@ -153,7 +153,7 @@ document.getElementById('puzzle').onclick = function(e) {
         }
 
         if(ułożony) {
-            solvedAlert();
+            okienkoWygranej();
         }
     }
 };
@@ -201,71 +201,70 @@ function test(src) {
     document.getElementById("hint").src = src; //obrazek źródłowy, wskazówka
 }
 
-function updateTextInput(val) {
-    document.getElementById('textInput').value=val;
-    rozmiar_planszy = val;
+function podajParametry(wartosc) {
+    document.getElementById('textInput').value=wartosc;
+    rozmiar_planszy = wartosc;
 }
-function solvedAlert() {
+function okienkoWygranej() {
     var retry = confirm('Wygrałeś! Chcesz zagrać ponownie?');
     if(retry) {
         resetPuzzle();
     }
 }
 
-function showHint() {
-    context.drawImage(obrazek, 0, 0);
-}
-
-document.getElementById('puzzle').onmouseover = function(e) {
-  //  showHint();
-};
-
 document.getElementById('hint').onmouseout = function(e) {
     rysowanieSiatki();
 };
 
-function getImage(url){
+function pobierzObrazek(źródło){
+    //asynchroniczny kod realizujący działanie obietnicy, wywołane resolve() jezeli sukces
+    //albo wywołane reject(), jeżeli porażka
+    // konstruktor Promise akceptuje pojedynczy argument - funkcje executor, która zawiera kod przeznaczony do
+    // zainicjalizowania obietnicy, funkcja executor otrzymuje podane jako argumenty dwie funkcje: resolve() oraz reject(),
+    // resolve() jest wywoływana, gdy executor zakonczy działanie sukcesem (obietnica jest gotowa do spełnienia),
+    // funkcja reject() jest wywoływana, gdy działanie executora zakonczyło sie niepowodzeniem
     return new Promise(
         function(resolve, reject){
-            obrazek.onload = function(){ resolve(url); };
-            obrazek.onerror = function(){ reject(url); };
-            obrazek.src = url;
+            obrazek.onload = function(){ resolve(źródło); };
+            obrazek.onerror = function(){ reject(źródło); };
+            obrazek.src = źródło;
         }
     );
 }
-function onSuccess(url){
-    document.getElementById("hint").src = url;
-    console.log("Success:  " + url)
-}
-function onFailure(url){
-    alert("on failure")
-    console.log("Error loading " + url);}
-/*loadFull wywoływana na onclick na obrazku skmpresowanym */
+
+//loadFull wywoływana na onclick na obrazku skompresowanym
 function loadFull(src){
-    var obietnica = getImage(src);
+    var obietnica = pobierzObrazek(src);
+// then() to podstawowa metoda pozwalajaca na podjecie działan po zmianie stanu obietnicy. Pobiera 2 argumenty:
+// Pierwszy to funkcja przeznaczona do wywołania,gdy obietnica bedzie spełniona. 2. arg. to funkcja wywoływana w przypadku
+// odrzucenia obietnicy
     obietnica.then(onSuccess).catch(onFailure);
     resetPuzzle()
 }
+function onSuccess(url){
+    document.getElementById("hint").src = url;
+}
 
+function onFailure(url){
+    alert("on failure")
+}
 function mousePos(e) {
     if (e.offsetX) {
         mouseX = e.offsetX;
         mouseY = e.offsetY;
-       // console.log(mouseX + mouseY)
     }
     else if (e.layerX) {
         mouseX = e.layerX;
         mouseY = e.layerY;
-       // console.log(mouseX + mouseY)
     }
 
     wybranyKlocek.x = Math.floor((mouseX) / rozmiarKlocka);
     wybranyKlocek.y = Math.floor((mouseY) / rozmiarKlocka);
-    var d = odległość(wybranyKlocek.x, wybranyKlocek.y, czerwonyKlocek.x, czerwonyKlocek.y);
-    if(d == 1){
-        document.body.style.cursor = 'grab'; // kursor łapka
+    var odl = odległość(wybranyKlocek.x, wybranyKlocek.y, czerwonyKlocek.x, czerwonyKlocek.y);
+    if(odl == 1){
+        document.body.style.cursor = 'grab'; // kursor łapka, czyli na klockach, na które możemy kliknąć
     }
     else {
-        document.body.style.cursor = 'default'; //kursor domyślna strzałka czyli ze nie mozna kliknac
+        document.body.style.cursor = 'default'; //kursor domyślna strzałka,czyli ze nie mozna kliknac
     }
 }
